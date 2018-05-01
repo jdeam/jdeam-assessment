@@ -7,13 +7,15 @@ class App extends Component {
     file: [],
   };
 
+  uploadInput = React.createRef();
+
   handleFileUpload = () => {
     const reader = new FileReader();
     reader.addEventListener("loadend", () => {
       const file = JSON.parse(reader.result);
       this.setState({ file });
     });
-    const uploadedFile = this.uploadInput.files[0];
+    const uploadedFile = this.uploadInput.current.files[0];
     if (!uploadedFile) return this.setState({ file: [] });
     reader.readAsText(uploadedFile);
   };
@@ -75,7 +77,7 @@ class App extends Component {
         </header>
         <div className="App-intro">
           <input 
-            ref={ (ref) => this.uploadInput = ref }
+            ref={ this.uploadInput }
             onChange={ this.handleFileUpload }
             type="file" 
           /> 
