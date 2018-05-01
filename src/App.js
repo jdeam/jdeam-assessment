@@ -82,7 +82,7 @@ class App extends Component {
             type="file" 
           /> 
         </div>
-        <div>
+        <div className="File-area">
           { this.convertArrayToReactEls(this.state.file) }
         </div>
       </div>
