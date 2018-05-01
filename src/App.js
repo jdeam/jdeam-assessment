@@ -61,7 +61,7 @@ class App extends Component {
             el.content
           );
         default:
-          return;
+          return null;
       }
     });
   };
