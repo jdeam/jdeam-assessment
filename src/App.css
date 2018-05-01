@@ -39,7 +39,12 @@
 }
 
 ul {
+  text-align: left;
   padding-left: 0;
+}
+
+ol {
+  text-align: left;
 }
 
 @keyframes App-logo-spin {

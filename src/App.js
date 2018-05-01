@@ -7,77 +7,75 @@ class App extends Component {
     file: [],
   };
 
-  handleFileUpload = (e) => {
-    e.preventDefault();
+  handleFileUpload = () => {
     const reader = new FileReader();
     reader.addEventListener("loadend", () => {
       const file = JSON.parse(reader.result);
       this.setState({ file });
     });
-    const upload = this.uploadInput.files[0];
-    if (!upload) return this.setState({ file: [] });
-    const blob = upload.slice(0);
-    reader.readAsText(blob);
+    const uploadedFile = this.uploadInput.files[0];
+    if (!uploadedFile) return this.setState({ file: [] });
+    reader.readAsText(uploadedFile);
+  };
+
+  getContentType = (content) => {
+    if (Array.isArray(content)) return "array";
+    else if (content.tag) return "object";
+    else if (content[0] === "<" && content.slice(-2) === "/>") return "html";
+    else return "text";
+  };
+
+  convertHtmlToReactEl = (html, i) => {
+    const [tag, ...attrs] = html.slice(1, -2).split(' ');
+    const props = attrs.reduce((obj, attr) => {
+      let [key, val] = attr.split("=");
+      val = val.slice(1, -1);
+      obj[key] = val;
+      return obj;
+    }, {});
+    props.key = i;
+    return React.createElement(tag, props);
   };
 
   convertArrayToReactEls = (arr) => {
     return arr.map((el, i) => {
-      if (Array.isArray(el.content)) {
-        return React.createElement(
-          el.tag, 
-          { key: i }, 
-          this.convertArrayToReactEls(el.content)
-        );
-      } else if (el.content.tag) {
-        return React.createElement(
-          el.tag,
-          { key: i },
-          this.convertArrayToReactEls([el.content])
-        );
-      } else if (this.elIsHtml(el.content)) {
-        return this.convertHtmlToReactEl(el.content, i);
-      } else {
-        return React.createElement(
-          el.tag,
-          { key: i },
-          el.content
-        );
+      switch (this.getContentType(el.content)) {
+        case "array":
+          return React.createElement(
+            el.tag, 
+            { key: i }, 
+            this.convertArrayToReactEls(el.content)
+          );
+        case "object":
+          return React.createElement(
+            el.tag,
+            { key: i },
+            this.convertArrayToReactEls([el.content])
+          );
+        case "html":
+          return this.convertHtmlToReactEl(el.content, i);
+        case "text":
+          return React.createElement(
+            el.tag,
+            { key: i },
+            el.content
+          );
+        default:
+          return;
       }
     });
-  };
-
-  elIsHtml = (el) => {
-    const firstChar = el[0];
-    const lastChar = el[el.length-1];
-    if (firstChar === "<" && lastChar === ">") return true;
-    return false;
-  };
-
-  convertHtmlToReactEl = (html, i) => {
-    const htmlArr = html.split(' ');
-    const [first, ...rest] = htmlArr;
-    const tag = first.slice(1);
-    const props = rest.reduce((props, attr, j, arr) => {
-      let [key, value] = attr.split("=");
-      if (j === arr.length-1) value = value.slice(1, -3);
-      else value = value.slice(1, -1);
-      props[key] = value;
-      return props;
-    }, {});
-    props.key = i;
-    return React.createElement(tag, props, null);
   };
 
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
+          <img src={ logo } className="App-logo" alt="logo" />
           <h1 className="App-title">Jordan's Cool App</h1>
         </header>
         <div className="App-intro">
           <input 
-            ref={ (ref) => { this.uploadInput = ref; } }
+            ref={ ref => this.uploadInput = ref }
             onChange={ this.handleFileUpload }
             type="file" 
           /> 
