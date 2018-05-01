@@ -75,7 +75,7 @@ class App extends Component {
         </header>
         <div className="App-intro">
           <input 
-            ref={ ref => this.uploadInput = ref }
+            ref={ (ref) => this.uploadInput = ref }
             onChange={ this.handleFileUpload }
             type="file" 
           /> 
