@@ -11,13 +11,13 @@ class App extends Component {
 
   handleFileUpload = () => {
     const reader = new FileReader();
-    reader.addEventListener("loadend", () => {
-      const file = JSON.parse(reader.result);
+    reader.onload = (e) => {
+      const file = JSON.parse(e.target.result);
       this.setState({ file });
-    });
+    };
     const uploadedFile = this.uploadInput.current.files[0];
     if (!uploadedFile) return this.setState({ file: [] });
-    reader.readAsText(uploadedFile);
+    reader.readAsText(uploadedFile, "application/json");
   };
 
   getContentType = (content) => {
