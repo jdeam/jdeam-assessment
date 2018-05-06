@@ -27,7 +27,7 @@ class App extends Component {
     return "text";
   };
 
-  convertHtmlToReactEl = (html, i) => {
+  convertHtmlToReactEl = (html, key) => {
     const [tag, ...attrs] = html.slice(1, -2).split(' ');
     const props = attrs.reduce((obj, attr) => {
       let [key, val] = attr.split("=");
@@ -35,32 +35,31 @@ class App extends Component {
       obj[key] = val;
       return obj;
     }, {});
-    props.key = i;
-    return React.createElement(tag, props);
+    return React.createElement(tag, { ...props, key });
   };
 
   convertArrayToReactEls = (arr) => {
-    return arr.map((el, i) => {
+    return arr.map((el, key) => {
       const { tag, content } = el;
       switch (this.getContentType(content)) {
         case "array":
           return React.createElement(
             tag, 
-            { key: i }, 
+            { key }, 
             this.convertArrayToReactEls(content)
           );
         case "object":
           return React.createElement(
             tag,
-            { key: i },
+            { key },
             this.convertArrayToReactEls([content])
           );
         case "html":
-          return this.convertHtmlToReactEl(content, i);
+          return this.convertHtmlToReactEl(content, key);
         case "text":
           return React.createElement(
             tag,
-            { key: i },
+            { key },
             content
           );
         default:
