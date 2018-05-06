@@ -7,17 +7,15 @@ class App extends Component {
     file: [],
   };
 
-  readFile = (e) => {
-    const file = JSON.parse(e.target.result);
-    this.setState({ file });
-  };
-
   handleFileUpload = (e) => {
     const uploadedFile = e.target.files[0];
     if (!uploadedFile) return this.setState({ file: [] });
     const reader = new FileReader();
-    reader.onload = this.readFile;
-    reader.readAsText(uploadedFile, "application/json");
+    reader.onload = (e) => {
+      const file = JSON.parse(e.target.result);
+      this.setState({ file });
+    };
+    reader.readAsText(uploadedFile);
   };
 
   getContentType = (content) => {
@@ -41,26 +39,27 @@ class App extends Component {
 
   convertArrayToReactEls = (arr) => {
     return arr.map((el, i) => {
-      switch (this.getContentType(el.content)) {
+      const { tag, content } = el;
+      switch (this.getContentType(content)) {
         case "array":
           return React.createElement(
-            el.tag, 
+            tag, 
             { key: i }, 
-            this.convertArrayToReactEls(el.content)
+            this.convertArrayToReactEls(content)
           );
         case "object":
           return React.createElement(
-            el.tag,
+            tag,
             { key: i },
-            this.convertArrayToReactEls([el.content])
+            this.convertArrayToReactEls([content])
           );
         case "html":
-          return this.convertHtmlToReactEl(el.content, i);
+          return this.convertHtmlToReactEl(content, i);
         case "text":
           return React.createElement(
-            el.tag,
+            tag,
             { key: i },
-            el.content
+            content
           );
         default:
           return null;
