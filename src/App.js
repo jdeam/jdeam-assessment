@@ -7,24 +7,24 @@ class App extends Component {
     file: [],
   };
 
-  uploadInput = React.createRef();
+  readFile = (e) => {
+    const file = JSON.parse(e.target.result);
+    this.setState({ file });
+  };
 
-  handleFileUpload = () => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const file = JSON.parse(e.target.result);
-      this.setState({ file });
-    };
-    const uploadedFile = this.uploadInput.current.files[0];
+  handleFileUpload = (e) => {
+    const uploadedFile = e.target.files[0];
     if (!uploadedFile) return this.setState({ file: [] });
+    const reader = new FileReader();
+    reader.onload = this.readFile;
     reader.readAsText(uploadedFile, "application/json");
   };
 
   getContentType = (content) => {
     if (Array.isArray(content)) return "array";
-    else if (content.tag) return "object";
-    else if (content[0] === "<" && content.slice(-2) === "/>") return "html";
-    else return "text";
+    if (content.tag) return "object";
+    if (content[0] === "<" && content.slice(-2) === "/>") return "html";
+    return "text";
   };
 
   convertHtmlToReactEl = (html, i) => {
@@ -77,9 +77,8 @@ class App extends Component {
         </header>
         <div className="App-intro">
           <input 
-            ref={ this.uploadInput }
-            onChange={ this.handleFileUpload }
             type="file" 
+            onChange={ this.handleFileUpload }
           /> 
         </div>
         <div className="File-area">
