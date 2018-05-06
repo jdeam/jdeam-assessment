@@ -7,14 +7,16 @@ class App extends Component {
     file: [],
   };
 
+  readFile = (e) => {
+    const file = JSON.parse(e.target.result);
+    this.setState({ file });
+  };
+
   handleFileUpload = (e) => {
     const uploadedFile = e.target.files[0];
     if (!uploadedFile) return this.setState({ file: [] });
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const file = JSON.parse(e.target.result);
-      this.setState({ file });
-    };
+    reader.onload = this.readFile;
     reader.readAsText(uploadedFile);
   };
 
