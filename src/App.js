@@ -20,14 +20,9 @@ class App extends Component {
     reader.readAsText(uploadedFile);
   };
 
-  getContentType = (content) => {
-    if (Array.isArray(content)) return "array";
-    if (content.tag) return "object";
-    if (content[0] === "<" && content.slice(-2) === "/>") return "html";
-    return "text";
-  };
+  isHtml = (content) => content[0] === "<" && content.slice(-2) === "/>";
 
-  convertHtmlToReactEl = (html, key) => {
+  htmlToReactEl = (html, key) => {
     const [tag, ...attrs] = html.slice(1, -2).split(' ');
     const props = attrs.reduce((obj, attr) => {
       let [key, val] = attr.split("=");
@@ -38,33 +33,25 @@ class App extends Component {
     return React.createElement(tag, { ...props, key });
   };
 
-  convertArrayToReactEls = (arr) => {
+  arrayToReactEls = (arr) => {
     return arr.map((el, key) => {
       const { tag, content } = el;
-      switch (this.getContentType(content)) {
-        case "array":
-          return React.createElement(
-            tag, 
-            { key }, 
-            this.convertArrayToReactEls(content)
-          );
-        case "object":
-          return React.createElement(
-            tag,
-            { key },
-            this.convertArrayToReactEls([content])
-          );
-        case "html":
-          return this.convertHtmlToReactEl(content, key);
-        case "text":
-          return React.createElement(
-            tag,
-            { key },
-            content
-          );
-        default:
-          return null;
-      }
+      if (Array.isArray(content)) return React.createElement(
+        tag, 
+        { key }, 
+        this.arrayToReactEls(content)
+      );
+      if (content.tag) return React.createElement(
+        tag,
+        { key },
+        this.arrayToReactEls([content])
+      );
+      if (this.isHtml(content)) return this.htmlToReactEl(content, key); 
+      return React.createElement(
+        tag,
+        { key },
+        content
+      );
     });
   };
 
@@ -82,7 +69,7 @@ class App extends Component {
           /> 
         </div>
         <div className="File-area">
-          { this.convertArrayToReactEls(this.state.file) }
+          { this.arrayToReactEls(this.state.file) }
         </div>
       </div>
     );
