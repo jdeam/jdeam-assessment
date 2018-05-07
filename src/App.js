@@ -21,21 +21,15 @@ class App extends Component {
   arrayToReactEls = (arr) => {
     return arr.map((el, key) => {
       let children;
+      let props = { key };
       const { tag, content } = el;
       if (Array.isArray(content)) children = this.arrayToReactEls(content);
       else if (content.tag) children = this.arrayToReactEls([content]);
       else if (content[0] === "<" && content.slice(-2) === "/>") {
-        const [tag, ...attrs] = content.slice(1, -2).split(' ');
-        const props = attrs.reduce((props, attr) => {
-          let [key, val] = attr.split("=");
-          val = val.slice(1, -1);
-          props[key] = val;
-          return props;
-        }, {});
-        children = React.createElement(tag, { ...props, key });
+        props.dangerouslySetInnerHTML = { __html: content };
       } 
       else children = content;
-      return React.createElement(tag, { key }, children);
+      return React.createElement(tag, props, children);
     });
   };
 
