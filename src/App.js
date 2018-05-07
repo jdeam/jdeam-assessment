@@ -18,17 +18,14 @@ class App extends Component {
     reader.readAsText(uploadedFile);
   };
 
-  arrayToReactEls = (arr) => {
+  convertArrayToReactEls = (arr) => {
     return arr.map((el, key) => {
       let children;
-      let props = { key };
+      const props = { key };
       const { tag, content } = el;
-      if (Array.isArray(content)) children = this.arrayToReactEls(content);
-      else if (content.tag) children = this.arrayToReactEls([content]);
-      else if (content[0] === "<" && content.slice(-2) === "/>") {
-        props.dangerouslySetInnerHTML = { __html: content };
-      } 
-      else children = content;
+      if (Array.isArray(content)) children = this.convertArrayToReactEls(content);
+      else if (content.tag) children = this.convertArrayToReactEls([content]);
+      else props.dangerouslySetInnerHTML = { __html: content };
       return React.createElement(tag, props, children);
     });
   };
@@ -46,7 +43,7 @@ class App extends Component {
         /> 
       </div>
       <div className="File-area">
-        { this.arrayToReactEls(this.state.file) }
+        { this.convertArrayToReactEls(this.state.file) }
       </div>
     </div>
   );
